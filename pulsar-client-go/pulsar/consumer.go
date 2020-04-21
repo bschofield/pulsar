@@ -153,6 +153,9 @@ type Consumer interface {
 	// Ack the consumption of a single message, identified by its MessageID
 	AckID(MessageID) error
 
+	// Ack the consumption of a single message, identified by its MessageID and a topic name
+	AckIDTopic(MessageID, string) error
+
 	// Ack the reception of all the messages in the stream up to (and including) the provided message.
 	// This method will block until the acknowledge has been sent to the broker. After that, the messages will not be
 	// re-delivered to this consumer.

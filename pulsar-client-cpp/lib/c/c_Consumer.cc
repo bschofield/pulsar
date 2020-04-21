@@ -80,6 +80,15 @@ void pulsar_consumer_acknowledge_async_id(pulsar_consumer_t *consumer, pulsar_me
         messageId->messageId, std::bind(handle_result_callback, std::placeholders::_1, callback, ctx));
 }
 
+void pulsar_consumer_acknowledge_async_id_topic(pulsar_consumer_t *consumer, pulsar_message_id_t *messageId,
+                                                const char *topic, pulsar_result_callback callback,
+                                                void *ctx) {
+    std::string t = std::string(topic);
+    messageId->messageId.setTopicName(t);
+    consumer->consumer.acknowledgeAsync(
+        messageId->messageId, std::bind(handle_result_callback, std::placeholders::_1, callback, ctx));
+}
+
 pulsar_result pulsar_consumer_acknowledge_cumulative(pulsar_consumer_t *consumer, pulsar_message_t *message) {
     return (pulsar_result)consumer->consumer.acknowledgeCumulative(message->message);
 }

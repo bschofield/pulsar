@@ -128,6 +128,11 @@ PULSAR_PUBLIC void pulsar_consumer_acknowledge_async_id(pulsar_consumer_t *consu
                                                         pulsar_message_id_t *messageId,
                                                         pulsar_result_callback callback, void *ctx);
 
+PULSAR_PUBLIC void pulsar_consumer_acknowledge_async_id_topic(pulsar_consumer_t *consumer,
+                                                              pulsar_message_id_t *messageId,
+                                                              const char *topic,
+                                                              pulsar_result_callback callback, void *ctx);
+
 /**
  * Acknowledge the reception of all the messages in the stream up to (and including)
  * the provided message.

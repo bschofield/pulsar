@@ -299,6 +299,13 @@ func (c *consumer) AckID(msgId MessageID) error {
 	return nil
 }
 
+func (c *consumer) AckIDTopic(msgId MessageID, topic string) error {
+	cTopic := C.CString(topic)
+	defer C.free(unsafe.Pointer(cTopic))
+	C.pulsar_consumer_acknowledge_async_id_topic(c.ptr, msgId.(*messageID).ptr, cTopic, nil, nil)
+	return nil
+}
+
 func (c *consumer) AckCumulative(msg Message) error {
 	C.pulsar_consumer_acknowledge_cumulative_async(c.ptr, msg.(*message).ptr, nil, nil)
 	return nil
