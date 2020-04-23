@@ -25,6 +25,7 @@ package pulsar
 import "C"
 
 import (
+	"bytes"
 	"reflect"
 	"runtime"
 	"time"
@@ -37,7 +38,9 @@ type message struct {
 }
 
 type messageID struct {
-	ptr *C.pulsar_message_id_t
+	ptr           *C.pulsar_message_id_t
+	topic         *C.char
+	finalizeTopic bool
 }
 
 ////////////////////////////////////////////////////////////
@@ -168,29 +171,42 @@ func (m *message) Topic() string {
 
 func newMessageId(msg *C.pulsar_message_t) MessageID {
 	msgId := &messageID{ptr: C.pulsar_message_get_message_id(msg)}
+	msgId.topic = C.pulsar_message_id_get_topic(msgId.ptr)
 	runtime.SetFinalizer(msgId, messageIdFinalizer)
 	return msgId
 }
 
 func getMessageId(messageId *C.pulsar_message_id_t) MessageID {
 	msgId := &messageID{ptr: messageId}
+	msgId.topic = C.pulsar_message_id_get_topic(msgId.ptr)
 	runtime.SetFinalizer(msgId, messageIdFinalizer)
 	return msgId
 }
 
 func messageIdFinalizer(msgID *messageID) {
 	C.pulsar_message_id_free(msgID.ptr)
+	if msgID.finalizeTopic {
+		C.free(unsafe.Pointer(msgID.topic))
+	}
 }
 
 func (m *messageID) Serialize() []byte {
 	var size C.int
 	buf := C.pulsar_message_id_serialize(m.ptr, &size)
 	defer C.free(unsafe.Pointer(buf))
-	return C.GoBytes(buf, size)
+	return append([]byte{C.GoString(msgId.topic)}, C.GoBytes(buf, size)...)
 }
 
 func deserializeMessageId(data []byte) MessageID {
-	msgId := &messageID{ptr: C.pulsar_message_id_deserialize(unsafe.Pointer(&data[0]), C.uint32_t(len(data)))}
+	topicLen := bytes.Index(data, '\x00')
+
+	// In this case we (not the C++ library) own the topic string, so we need to mark it for finalization
+	msgId := &messageID{
+		ptr:           C.pulsar_message_id_deserialize(unsafe.Pointer(&data[topicLen+1]), C.uint32_t(len(data)-topicLen-1)),
+		topic:         C.CString(unsafe.Pointer(&data[0])),
+		finalizeTopic: true,
+	}
+	C.pulsar_message_id_set_topic(msgId.ptr, msgId.topic)
 	runtime.SetFinalizer(msgId, messageIdFinalizer)
 	return msgId
 }
@@ -198,17 +214,21 @@ func deserializeMessageId(data []byte) MessageID {
 func (m *messageID) String() string {
 	str := C.pulsar_message_id_str(m.ptr)
 	defer C.free(unsafe.Pointer(str))
-	return C.GoString(str)
+	return C.GoString(m.topic) + " " + C.GoString(str)
 }
 
 func earliestMessageID() *messageID {
-	// No need to use finalizer since the pointer doesn't need to be freed
-	return &messageID{C.pulsar_message_id_earliest()}
+	// No need to use finalizer since the pointers don't need to be freed
+	msgId := &messageID{C.pulsar_message_id_earliest()}
+	msgId.topic = C.pulsar_get_message_id_topic(msgId.ptr)
+	return msgId
 }
 
 func latestMessageID() *messageID {
-	// No need to use finalizer since the pointer doesn't need to be freed
-	return &messageID{C.pulsar_message_id_latest()}
+	// No need to use finalizer since the pointers don't need to be freed
+	msgId := &messageID{C.pulsar_message_id_latest()}
+	msgId.topic = C.pulsar_get_message_id_topic(msgId.ptr)
+	return msgId
 }
 
 func timeFromUnixTimestampMillis(timestamp C.ulonglong) time.Time {

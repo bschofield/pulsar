@@ -59,6 +59,16 @@ pulsar_message_id_t *pulsar_message_id_deserialize(const void *buffer, uint32_t 
     return messageId;
 }
 
+const char *pulsar_message_id_get_topic(pulsar_message_id_t *messageId) {
+    return messageId->messageId.getTopicName().c_str()
+}
+
+const char *pulsar_message_id_set_topic(pulsar_message_id_t *messageId, const char *topic) {
+    std::string t;
+    *(t.data()) = topic;
+    return messageId->messageId.getTopicName().c_str()
+}
+
 char *pulsar_message_id_str(pulsar_message_id_t *messageId) {
     std::stringstream ss;
     ss << messageId->messageId;
