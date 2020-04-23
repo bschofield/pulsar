@@ -153,6 +153,11 @@ type Consumer interface {
 	// Ack the consumption of a single message, identified by its MessageID
 	AckID(MessageID) error
 
+	// Ack the consumption of a single message, identified by its MessageID and a topic name.
+	//
+	// This is necessary when using multiple-topic subscriptions.
+	AckIDWithTopic(MessageID, string) error
+
 	// Ack the reception of all the messages in the stream up to (and including) the provided message.
 	// This method will block until the acknowledge has been sent to the broker. After that, the messages will not be
 	// re-delivered to this consumer.
@@ -180,7 +185,7 @@ type Consumer interface {
 	// This call is not blocking.
 	Nack(Message) error
 
-	// Acknowledge the failure to process a single message.
+	// Acknowledge the failure to process a single message, identified by its MessageID.
 	//
 	// When a message is "negatively acked" it will be marked for redelivery after
 	// some fixed delay. The delay is configurable when constructing the consumer
@@ -188,6 +193,13 @@ type Consumer interface {
 	//
 	// This call is not blocking.
 	NackID(MessageID) error
+
+	// Acknowledge the failure to process a single message, identified by its MessageID and a topic name.
+	//
+	// This is necessary when using multiple-topic subscriptions.
+	//
+	// This call is not blocking.
+	NackIDWithTopic(MessageID, string) error
 
 	// Close the consumer and stop the broker to push more messages
 	Close() error

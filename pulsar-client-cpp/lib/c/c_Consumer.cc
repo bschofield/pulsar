@@ -68,6 +68,13 @@ pulsar_result pulsar_consumer_acknowledge_id(pulsar_consumer_t *consumer, pulsar
     return (pulsar_result)consumer->consumer.acknowledge(messageId->messageId);
 }
 
+pulsar_result pulsar_consumer_acknowledge_id_with_topic(pulsar_consumer_t *consumer,
+                                                        pulsar_message_id_t *messageId, const char *topic) {
+    std::string t = std::string(topic);
+    messageId->messageId.setTopicName(t);
+    return (pulsar_result)consumer->consumer.acknowledge(messageId->messageId);
+}
+
 void pulsar_consumer_acknowledge_async(pulsar_consumer_t *consumer, pulsar_message_t *message,
                                        pulsar_result_callback callback, void *ctx) {
     consumer->consumer.acknowledgeAsync(
@@ -76,6 +83,15 @@ void pulsar_consumer_acknowledge_async(pulsar_consumer_t *consumer, pulsar_messa
 
 void pulsar_consumer_acknowledge_async_id(pulsar_consumer_t *consumer, pulsar_message_id_t *messageId,
                                           pulsar_result_callback callback, void *ctx) {
+    consumer->consumer.acknowledgeAsync(
+        messageId->messageId, std::bind(handle_result_callback, std::placeholders::_1, callback, ctx));
+}
+
+void pulsar_consumer_acknowledge_async_id_with_topic(pulsar_consumer_t *consumer,
+                                                     pulsar_message_id_t *messageId, const char *topic,
+                                                     pulsar_result_callback callback, void *ctx) {
+    std::string t = std::string(topic);
+    messageId->messageId.setTopicName(t);
     consumer->consumer.acknowledgeAsync(
         messageId->messageId, std::bind(handle_result_callback, std::placeholders::_1, callback, ctx));
 }
@@ -107,6 +123,13 @@ void pulsar_consumer_negative_acknowledge(pulsar_consumer_t *consumer, pulsar_me
 }
 
 void pulsar_consumer_negative_acknowledge_id(pulsar_consumer_t *consumer, pulsar_message_id_t *messageId) {
+    consumer->consumer.negativeAcknowledge(messageId->messageId);
+}
+
+void pulsar_consumer_negative_acknowledge_id_with_topic(pulsar_consumer_t *consumer,
+                                                        pulsar_message_id_t *messageId, const char *topic) {
+    std::string t = std::string(topic);
+    messageId->messageId.setTopicName(t);
     consumer->consumer.negativeAcknowledge(messageId->messageId);
 }
 

@@ -112,6 +112,10 @@ PULSAR_PUBLIC pulsar_result pulsar_consumer_acknowledge(pulsar_consumer_t *consu
 PULSAR_PUBLIC pulsar_result pulsar_consumer_acknowledge_id(pulsar_consumer_t *consumer,
                                                            pulsar_message_id_t *messageId);
 
+PULSAR_PUBLIC pulsar_result pulsar_consumer_acknowledge_id_with_topic(pulsar_consumer_t *consumer,
+                                                                      pulsar_message_id_t *messageId,
+                                                                      const char *topic, size_t len);
+
 /**
  * Asynchronously acknowledge the reception of a single message.
  *
@@ -127,6 +131,12 @@ PULSAR_PUBLIC void pulsar_consumer_acknowledge_async(pulsar_consumer_t *consumer
 PULSAR_PUBLIC void pulsar_consumer_acknowledge_async_id(pulsar_consumer_t *consumer,
                                                         pulsar_message_id_t *messageId,
                                                         pulsar_result_callback callback, void *ctx);
+
+PULSAR_PUBLIC void pulsar_consumer_acknowledge_async_id_with_topic(pulsar_consumer_t *consumer,
+                                                                   pulsar_message_id_t *messageId,
+                                                                   const char *topic, size_t len,
+                                                                   pulsar_result_callback callback,
+                                                                   void *ctx);
 
 /**
  * Acknowledge the reception of all the messages in the stream up to (and including)
@@ -199,6 +209,10 @@ PULSAR_PUBLIC void pulsar_consumer_negative_acknowledge(pulsar_consumer_t *consu
  */
 PULSAR_PUBLIC void pulsar_consumer_negative_acknowledge_id(pulsar_consumer_t *consumer,
                                                            pulsar_message_id_t *messageId);
+
+PULSAR_PUBLIC void pulsar_consumer_negative_acknowledge_id_with_topic(pulsar_consumer_t *consumer,
+                                                                      pulsar_message_id_t *messageId,
+                                                                      const char *topic, size_t len);
 
 PULSAR_PUBLIC pulsar_result pulsar_consumer_close(pulsar_consumer_t *consumer);
 
