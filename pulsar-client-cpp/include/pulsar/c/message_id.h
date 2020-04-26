@@ -49,6 +49,12 @@ PULSAR_PUBLIC void *pulsar_message_id_serialize(pulsar_message_id_t *messageId, 
  */
 PULSAR_PUBLIC pulsar_message_id_t *pulsar_message_id_deserialize(const void *buffer, uint32_t len);
 
+PULSAR_PUBLIC const char *pulsar_message_id_get_topic(pulsar_message_id_t *messageId);
+
+PULSAR_PUBLIC const void *pulsar_message_id_set_topic(pulsar_message_id_t *messageId, const char *topic);
+
+PULSAR_PUBLIC void pulsar_message_id_free_topic(void *p);
+
 PULSAR_PUBLIC char *pulsar_message_id_str(pulsar_message_id_t *messageId);
 
 PULSAR_PUBLIC void pulsar_message_id_free(pulsar_message_id_t *messageId);

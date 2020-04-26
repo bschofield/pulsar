@@ -38,9 +38,9 @@ type message struct {
 }
 
 type messageID struct {
-	ptr           *C.pulsar_message_id_t
-	topic         *C.char
-	finalizeTopic bool
+	ptr            *C.pulsar_message_id_t
+	topic          *C.char
+	topicStdString *C.void
 }
 
 ////////////////////////////////////////////////////////////
@@ -185,7 +185,8 @@ func getMessageId(messageId *C.pulsar_message_id_t) MessageID {
 
 func messageIdFinalizer(msgID *messageID) {
 	C.pulsar_message_id_free(msgID.ptr)
-	if msgID.finalizeTopic {
+	if msgID.topicStdString != nil {
+		C.pulsar_message_id_free_topic(unsafe.Pointer(msgID.topicStdString))
 		C.free(unsafe.Pointer(msgID.topic))
 	}
 }
